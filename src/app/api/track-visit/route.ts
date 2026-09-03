@@ -7,7 +7,10 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const path = typeof body.path === "string" ? body.path.slice(0, 200) : "/";
-    await logVisit(path);
+    // Vercel agrega esta cabecera automáticamente con el país del visitante,
+    // detectado por su IP. No pedimos ni guardamos la IP en sí.
+    const country = req.headers.get("x-vercel-ip-country") || "Desconocido";
+    await logVisit(path, country);
   } catch {
     // Nunca romper la navegación del usuario por un fallo al registrar la visita.
   }
