@@ -36,6 +36,7 @@ type OrderRow = {
   subtotal: number;
   shipping: number;
   total: number;
+  session_id: string | null;
 };
 
 function rowToOrder(row: OrderRow): Order {
@@ -68,6 +69,7 @@ export async function createOrder(input: {
   subtotal: number;
   shipping: number;
   total: number;
+  sessionId?: string;
 }): Promise<Order> {
   if (isSupabaseAdminConfigured()) {
     const db = getSupabaseAdmin();
@@ -90,6 +92,7 @@ export async function createOrder(input: {
         subtotal: input.subtotal,
         shipping: input.shipping,
         total: input.total,
+        session_id: input.sessionId ?? null,
       })
       .select()
       .single();
