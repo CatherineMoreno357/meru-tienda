@@ -11,8 +11,8 @@ function WhatsAppIcon() {
   );
 }
 
-export default function WhatsAppButton() {
-  const href = `https://wa.me/${storeConfig.whatsapp.number}?text=${encodeURIComponent(
+export default function WhatsAppButton({ whatsappNumber }: { whatsappNumber: string }) {
+  const href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     storeConfig.whatsapp.defaultMessage
   )}`;
 
