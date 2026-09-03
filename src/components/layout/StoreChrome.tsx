@@ -6,8 +6,15 @@ import TopBanner from "@/components/layout/TopBanner";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
+import { StoreSettings } from "@/lib/data/settingsStore";
 
-export default function StoreChrome({ children }: { children: React.ReactNode }) {
+export default function StoreChrome({
+  children,
+  settings,
+}: {
+  children: React.ReactNode;
+  settings: StoreSettings;
+}) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
 
@@ -35,8 +42,8 @@ export default function StoreChrome({ children }: { children: React.ReactNode })
       <TopBanner />
       <Header />
       <main className="flex-1">{children}</main>
-      <Footer />
-      <WhatsAppButton />
+      <Footer settings={settings} />
+      <WhatsAppButton whatsappNumber={settings.whatsappNumber} />
     </>
   );
 }
