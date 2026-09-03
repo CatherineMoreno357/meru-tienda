@@ -14,14 +14,14 @@ export const storeConfig = {
     "Meru es una tienda en línea colombiana con productos de hogar, herramientas, moda, decoración, bienestar, tecnología y los hallazgos más virales de redes sociales. Paga contra entrega en toda Colombia.",
 
   whatsapp: {
-    number: "573001234567", // formato internacional sin '+', usado en wa.me
+    number: "573106165441", // formato internacional sin '+', usado en wa.me
     defaultMessage:
       "¡Hola! Vengo desde la página de Meru y tengo una pregunta 🙂",
   },
 
   contact: {
-    adminEmail: "pedidos@meru.co",
-    supportEmail: "hola@meru.co",
+    adminEmail: "katerineanlly@gmail.com",
+    supportEmail: "katerineanlly@gmail.com",
     city: "Bogotá, Colombia",
   },
 
@@ -40,7 +40,7 @@ export const storeConfig = {
 
   topBanner: {
     enabled: true,
-    text: "Envíos a toda Colombia · Paga contra entrega · Cambios sin complicaciones",
+    text: "Envíos a todo Colombia · Pago contra entrega",
   },
 
   hero: {
