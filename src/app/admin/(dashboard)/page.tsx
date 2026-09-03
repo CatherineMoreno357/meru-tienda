@@ -1,6 +1,7 @@
-import { Package, ShoppingCart, DollarSign, Sparkles } from "lucide-react";
+import { Package, ShoppingCart, DollarSign, Sparkles, Eye } from "lucide-react";
 import { listOrders } from "@/lib/orders";
 import { listAllProducts } from "@/lib/data/productsStore";
+import { getVisitCount } from "@/lib/data/visitsStore";
 import { formatPrice } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -8,11 +9,17 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboardPage() {
   const orders = await listOrders();
   const products = await listAllProducts();
+  const visits = await getVisitCount();
 
   const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
   const newOrders = orders.filter((o) => o.status === "Nuevo").length;
 
   const cards = [
+    {
+      label: "Visitas a la tienda",
+      value: visits.toString(),
+      icon: Eye,
+    },
     {
       label: "Pedidos totales",
       value: orders.length > 0 ? orders.length.toString() : "0",
@@ -40,7 +47,7 @@ export default async function AdminDashboardPage() {
       <h1 className="font-display text-2xl font-semibold sm:text-3xl">Dashboard</h1>
       <p className="mt-1 text-muted">Resumen general de tu tienda.</p>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {cards.map((c) => (
           <div key={c.label} className="rounded-2xl border border-border bg-surface p-5">
             <c.icon className="h-5 w-5 text-accent" />
