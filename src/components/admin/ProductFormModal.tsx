@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { X, UploadCloud, Loader2, ImagePlus, Link2 } from "lucide-react";
-import { Product, ProductTag, Category } from "@/types";
+import { Product, ProductTag, Category, ProductVariant } from "@/types";
 
 const allTags: ProductTag[] = ["nuevo", "masVendido", "oferta"];
 
@@ -29,6 +29,8 @@ export default function ProductFormModal({
     stock: product?.stock?.toString() ?? "10",
     tags: product?.tags ?? [],
     active: product?.active ?? true,
+    colors: (product?.variants?.find((v) => v.type === "color")?.options ?? []).join(", "),
+    tallas: (product?.variants?.find((v) => v.type === "talla")?.options ?? []).join(", "),
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,6 +99,12 @@ export default function ProductFormModal({
     setSaving(true);
     setError(null);
 
+    const variants: ProductVariant[] = [];
+    const colorOptions = form.colors.split(",").map((s) => s.trim()).filter(Boolean);
+    const tallaOptions = form.tallas.split(",").map((s) => s.trim()).filter(Boolean);
+    if (colorOptions.length > 0) variants.push({ type: "color", options: colorOptions });
+    if (tallaOptions.length > 0) variants.push({ type: "talla", options: tallaOptions });
+
     const payload = {
       name: form.name,
       category: form.category,
@@ -109,6 +117,7 @@ export default function ProductFormModal({
       stock: Number(form.stock),
       tags: form.tags,
       active: form.active,
+      variants: variants.length > 0 ? variants : undefined,
     };
 
     const url = product ? `/api/admin/products/${product.id}` : "/api/admin/products";
@@ -284,6 +293,36 @@ export default function ProductFormModal({
             >
               <ImagePlus className="h-3.5 w-3.5" /> Agregar
             </button>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <p className="mb-2 text-sm font-medium text-muted">
+            Variantes (opcional — deja vacío si el producto no las necesita)
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs text-muted">
+                Colores (separados por coma)
+              </label>
+              <input
+                placeholder="Ej: Negro, Blanco, Gris"
+                className={inputClass}
+                value={form.colors}
+                onChange={(e) => setForm({ ...form, colors: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-muted">
+                Tallas (separadas por coma)
+              </label>
+              <input
+                placeholder="Ej: S, M, L, XL"
+                className={inputClass}
+                value={form.tallas}
+                onChange={(e) => setForm({ ...form, tallas: e.target.value })}
+              />
+            </div>
           </div>
         </div>
 
