@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
 import { listAllProducts, upsertProduct } from "@/lib/data/productsStore";
 import { slugify } from "@/lib/utils";
+
+function revalidateStoreProduct(categorySlug?: string, productSlug?: string) {
+  revalidatePath("/");
+  revalidatePath("/tienda");
+  if (categorySlug) revalidatePath(`/categoria/${categorySlug}`);
+  if (productSlug) revalidatePath(`/producto/${productSlug}`);
+}
 
 export async function GET() {
   const session = await getAdminSession();
@@ -30,7 +38,9 @@ export async function POST(req: NextRequest) {
     tags: body.tags || [],
     stock: Number(body.stock) || 0,
     active: body.active ?? true,
+    variants: body.variants ?? undefined,
   });
 
+  revalidateStoreProduct(product.category, product.slug);
   return NextResponse.json(product, { status: 201 });
 }
