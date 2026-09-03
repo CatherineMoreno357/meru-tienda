@@ -17,12 +17,41 @@ interface CartState {
   subtotal: () => number;
 }
 
+// Identificador anónimo de esta sesión de navegador (no personal, no es un
+// dato del cliente). Se usa solo para saber, de forma agregada, cuántos
+// carritos se abandonan sin completar la compra. Vive en localStorage.
+export function getCartSessionId(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    const key = "meru_cart_session";
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = `s_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem(key, id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+}
+
+function trackCartEvent(productSlug: string, productName: string) {
+  const sessionId = getCartSessionId();
+  if (!sessionId) return;
+  fetch("/api/track-cart-event", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ sessionId, productSlug, productName }),
+  }).catch(() => {});
+}
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
       isOpen: false,
-      addItem: (item) =>
+      addItem: (item) => {
+        trackCartEvent(item.slug, item.name);
         set((state) => {
           const existing = state.items.find(
             (i) => i.productId === item.productId && i.variant === item.variant
@@ -37,7 +66,8 @@ export const useCartStore = create<CartState>()(
             };
           }
           return { items: [...state.items, item] };
-        }),
+        });
+      },
       removeItem: (productId, variant) =>
         set((state) => ({
           items: state.items.filter(
