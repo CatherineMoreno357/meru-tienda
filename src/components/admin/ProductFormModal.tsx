@@ -23,7 +23,6 @@ export default function ProductFormModal({
     subcategory: product?.subcategory ?? categories[0]?.subcategories[0] ?? "",
     price: product?.price?.toString() ?? "",
     previousPrice: product?.previousPrice?.toString() ?? "",
-    shortDescription: product?.shortDescription ?? "",
     description: product?.description ?? "",
     images: product?.images ?? [],
     stock: product?.stock?.toString() ?? "10",
@@ -111,7 +110,10 @@ export default function ProductFormModal({
       subcategory: form.subcategory,
       price: Number(form.price),
       previousPrice: form.previousPrice ? Number(form.previousPrice) : undefined,
-      shortDescription: form.shortDescription,
+      // La "descripción corta" ya no se pide en el formulario: se genera sola
+      // a partir de la descripción completa (se usa solo para SEO, no se
+      // muestra en la tienda).
+      shortDescription: form.description.slice(0, 160),
       description: form.description,
       images: form.images,
       stock: Number(form.stock),
@@ -210,16 +212,9 @@ export default function ProductFormModal({
         </div>
 
         <textarea
-          placeholder="Descripción corta"
-          className={`${inputClass} mt-3`}
-          rows={2}
-          value={form.shortDescription}
-          onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
-        />
-        <textarea
           placeholder="Descripción completa"
           className={`${inputClass} mt-3`}
-          rows={3}
+          rows={5}
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
