@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCartStore } from "@/lib/store/cart";
+import { useCartStore, getCartSessionId } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { checkoutSchema, CheckoutFormValues } from "@/lib/validation/checkout";
 import { departamentosColombia } from "@/lib/colombia";
@@ -58,6 +58,7 @@ export default function CheckoutPage() {
           subtotal: subtotal(),
           shipping: 0,
           total: subtotal(),
+          sessionId: getCartSessionId(),
         }),
       });
 
