@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { AtSign, Globe, Music2, Mail, Phone } from "lucide-react";
+import { AtSign, Globe, Music2, Phone } from "lucide-react";
 import { storeConfig } from "@/config/store";
 import { categories } from "@/lib/data/categories";
+import { StoreSettings } from "@/lib/data/settingsStore";
 
-export default function Footer() {
+export default function Footer({ settings }: { settings: StoreSettings }) {
   return (
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-6 py-14 sm:grid-cols-2 md:grid-cols-4">
@@ -14,13 +15,13 @@ export default function Footer() {
           </Link>
           <p className="mt-3 text-sm text-muted">{storeConfig.description}</p>
           <div className="mt-4 flex items-center gap-3">
-            <a href={storeConfig.social.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
+            <a href={settings.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
               <AtSign className="h-5 w-5 text-muted transition-colors hover:text-accent" />
             </a>
-            <a href={storeConfig.social.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok">
+            <a href={settings.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok">
               <Music2 className="h-5 w-5 text-muted transition-colors hover:text-accent" />
             </a>
-            <a href={storeConfig.social.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
+            <a href={settings.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
               <Globe className="h-5 w-5 text-muted transition-colors hover:text-accent" />
             </a>
           </div>
@@ -56,12 +57,9 @@ export default function Footer() {
           <p className="mb-3 text-sm font-semibold">Contacto</p>
           <ul className="flex flex-col gap-2 text-sm text-muted">
             <li className="flex items-center gap-2">
-              <Phone className="h-4 w-4" /> +{storeConfig.whatsapp.number}
+              <Phone className="h-4 w-4" /> +{settings.whatsappNumber}
             </li>
-            <li className="flex items-center gap-2">
-              <Mail className="h-4 w-4" /> {storeConfig.contact.supportEmail}
-            </li>
-            <li>{storeConfig.contact.city}</li>
+            <li>{settings.city}</li>
           </ul>
         </div>
       </div>
