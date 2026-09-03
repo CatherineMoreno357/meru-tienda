@@ -9,6 +9,25 @@ import { useCartStore } from "@/lib/store/cart";
 import { useFavoritesStore } from "@/lib/store/favorites";
 import { useRouter } from "next/navigation";
 
+// Muchas descripciones se pegan como un solo párrafo largo con frases
+// separadas por puntos (típico de descripciones copiadas de proveedores).
+// Si el vendedor ya escribió saltos de línea propios, se respetan tal cual;
+// si no, se separa automáticamente por oración para que no se vea como un
+// bloque de texto ilegible.
+function formatDescription(text: string): string[] {
+  if (!text) return [];
+  if (text.includes("\n")) {
+    return text
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+  }
+  return text
+    .split(/(?<=[.!?])\s+(?=\S)/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
+
 export default function ProductDetail({ product }: { product: Product }) {
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -101,7 +120,11 @@ export default function ProductDetail({ product }: { product: Product }) {
           )}
         </div>
 
-        <p className="mt-4 text-sm leading-relaxed text-muted">{product.description}</p>
+        <div className="mt-4 flex flex-col gap-2 text-sm leading-relaxed text-muted">
+          {formatDescription(product.description).map((line, i) => (
+            <p key={i}>{line}</p>
+          ))}
+        </div>
 
         {product.variants?.map((variant) => (
           <div key={variant.type} className="mt-6">
