@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
       subtotal: body.subtotal ?? 0,
       shipping: body.shipping ?? 0,
       total: body.total ?? body.subtotal ?? 0,
+      sessionId: typeof body.sessionId === "string" ? body.sessionId : undefined,
     });
 
     await sendNewOrderEmail(order);
