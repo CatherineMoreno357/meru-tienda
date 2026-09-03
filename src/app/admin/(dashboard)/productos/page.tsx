@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Power, Search } from "lucide-react";
-import { Product } from "@/types";
+import { Product, Category } from "@/types";
 import { formatPrice, cn } from "@/lib/utils";
-import { categories } from "@/lib/data/categories";
 import ProductFormModal from "@/components/admin/ProductFormModal";
 
 export default function AdminProductosPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -21,9 +21,16 @@ export default function AdminProductosPage() {
     setLoading(false);
   }
 
+  async function loadCategories() {
+    const res = await fetch("/api/admin/categories");
+    if (res.ok) setCategories(await res.json());
+  }
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadCategories();
   }, []);
 
   async function handleDelete(id: string) {
