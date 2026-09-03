@@ -17,8 +17,7 @@ export default function WhatsAppButton({ whatsappNumber }: { whatsappNumber: str
   )}`;
 
   return (
-    
-      href={href}
+    <a href={href}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escríbenos por WhatsApp"
