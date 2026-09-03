@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useRef, useState } from "react";
+import { X, UploadCloud, Loader2, ImagePlus, Link2 } from "lucide-react";
 import { Product, ProductTag, Category } from "@/types";
 
 const allTags: ProductTag[] = ["nuevo", "masVendido", "oferta"];
@@ -25,15 +25,65 @@ export default function ProductFormModal({
     previousPrice: product?.previousPrice?.toString() ?? "",
     shortDescription: product?.shortDescription ?? "",
     description: product?.description ?? "",
-    images: product?.images?.join("\n") ?? "",
+    images: product?.images ?? [],
     stock: product?.stock?.toString() ?? "10",
     tags: product?.tags ?? [],
     active: product?.active ?? true,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<string[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [manualUrl, setManualUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedCategory = categories.find((c) => c.slug === form.category);
+
+  function addImage(url: string) {
+    setForm((f) => ({ ...f, images: [...f.images, url] }));
+  }
+
+  function removeImage(index: number) {
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+  }
+
+  async function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setUploadError(null);
+
+    const list = Array.from(files);
+    const tempIds = list.map((file) => `${file.name}-${Date.now()}-${Math.random()}`);
+    setUploading((u) => [...u, ...tempIds]);
+
+    await Promise.all(
+      list.map(async (file, idx) => {
+        const tempId = tempIds[idx];
+        try {
+          const body = new FormData();
+          body.append("file", file);
+          const res = await fetch("/api/admin/upload", { method: "POST", body });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || "No se pudo subir la imagen");
+          }
+          addImage(data.url);
+        } catch (err) {
+          setUploadError(err instanceof Error ? err.message : "No se pudo subir la imagen");
+        } finally {
+          setUploading((u) => u.filter((id) => id !== tempId));
+        }
+      })
+    );
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function handleAddManualUrl() {
+    const url = manualUrl.trim();
+    if (!url) return;
+    addImage(url);
+    setManualUrl("");
+  }
 
   function toggleTag(tag: ProductTag) {
     setForm((f) => ({
@@ -55,7 +105,7 @@ export default function ProductFormModal({
       previousPrice: form.previousPrice ? Number(form.previousPrice) : undefined,
       shortDescription: form.shortDescription,
       description: form.description,
-      images: form.images.split("\n").map((s) => s.trim()).filter(Boolean),
+      images: form.images,
       stock: Number(form.stock),
       tags: form.tags,
       active: form.active,
@@ -164,13 +214,78 @@ export default function ProductFormModal({
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
-        <textarea
-          placeholder="URLs de imágenes (una por línea)"
-          className={`${inputClass} mt-3`}
-          rows={3}
-          value={form.images}
-          onChange={(e) => setForm({ ...form, images: e.target.value })}
-        />
+        <div className="mt-3">
+          <p className="mb-2 text-sm font-medium text-muted">Fotos del producto</p>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => handleFiles(e.target.files)}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface-2 px-4 py-6 text-center text-sm text-muted transition hover:border-accent hover:text-foreground"
+          >
+            <UploadCloud className="h-6 w-6" />
+            <span>
+              Arrastra o <span className="font-medium text-accent">selecciona imágenes</span> desde tu computador
+            </span>
+            <span className="text-xs text-muted">JPG, PNG, WEBP o GIF · máx. 5MB por foto</span>
+          </button>
+
+          {uploadError && <p className="mt-2 text-sm text-red-400">{uploadError}</p>}
+
+          {(form.images.length > 0 || uploading.length > 0) && (
+            <div className="mt-3 flex flex-wrap gap-3">
+              {form.images.map((url, i) => (
+                <div key={url + i} className="group relative h-20 w-20 overflow-hidden rounded-xl border border-border bg-surface-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white opacity-0 transition group-hover:opacity-100"
+                    aria-label="Eliminar imagen"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              {uploading.map((id) => (
+                <div key={id} className="flex h-20 w-20 items-center justify-center rounded-xl border border-border bg-surface-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-accent" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-3 flex items-center gap-2">
+            <Link2 className="h-4 w-4 shrink-0 text-muted" />
+            <input
+              placeholder="O pega la URL de una imagen externa (opcional)"
+              className={inputClass}
+              value={manualUrl}
+              onChange={(e) => setManualUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddManualUrl();
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleAddManualUrl}
+              className="flex shrink-0 items-center gap-1 rounded-lg border border-border px-3 py-2.5 text-xs text-muted hover:text-foreground"
+            >
+              <ImagePlus className="h-3.5 w-3.5" /> Agregar
+            </button>
+          </div>
+        </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
           {allTags.map((tag) => (
